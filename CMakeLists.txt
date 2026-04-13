@@ -41,7 +41,7 @@ add_executable(pico-iot-panel
     src/pwm.c
     src/buttons.c
     src/wifi.c
-    src/http_client.c
+    src/http_server.c
     src/display.c
 )
 
@@ -49,7 +49,7 @@ pico_set_program_name(pico-iot-panel "pico-iot-panel")
 pico_set_program_version(pico-iot-panel "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(pico-iot-panel 0)
+pico_enable_stdio_uart(pico-iot-panel 1)
 pico_enable_stdio_usb(pico-iot-panel 1)
 
 # Add the standard library to the build

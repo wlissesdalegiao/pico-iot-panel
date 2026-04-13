@@ -7,7 +7,7 @@
 #include "buttons.h"
 #include "display.h"
 #include "wifi.h"
-#include "http_client.h"
+#include "http_server.h"
 
 typedef enum {
     MODE_MANUAL = 0,
@@ -36,7 +36,9 @@ int main() {
     display_update();
     sleep_ms(5000);
 */
+
     wifi_init_sta("Olele", "87478889");
+    http_server_init();
 
     while (1) {
         float temp = read_internal_temperature();
@@ -44,19 +46,30 @@ int main() {
 
         int pwm_percent;
 
+/*      //código antigo
         if (mode == MODE_MANUAL) {
             pwm_percent = joy * 100 / 4095;
         } else {
             pwm_percent = (temp > 30) ? 20 : 80;
         }
+*/
+        // se em modo remoto, o led é comandado pelo http
+        // se não, é comandado pelo joystick
+        if (http_is_remote_mode()) {
+            pwm_percent = http_get_remote_pwm();
+        } else {
+            pwm_percent = joy * 100 / 4095;
+        }
 
         pwm_set_percent(pwm_percent);
+
+        http_server_update_data(temp, joy, pwm_percent);
 
         display_main_screen(temp, joy, pwm_percent, wifi_is_connected(), mode);
 
         printf("Temp: %.2f | Joy: %d | PWM: %d%%\n", temp, joy, pwm_percent);
 
-        http_send_data(temp, joy, pwm_percent);
+        http_server_update_data(temp, joy, pwm_percent);
 
         sleep_ms(1000);
     }
